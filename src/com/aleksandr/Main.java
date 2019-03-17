@@ -2,14 +2,17 @@ package com.aleksandr;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 public class Main {
 
     private static WebDriver driver;
-    private WebDriverWait wait;
 
     public static void setup() {
         System.setProperty("webdriver.chrome.driver", "drv/chromedriver.exe");
@@ -24,21 +27,28 @@ public class Main {
 
         driver.findElement(By.xpath("//ol/li/a[contains(text(),'Страхование')]")).click();
 
-        driver.findElement(By.xpath("//*[@id=\"rgs-main-menu-insurance-dropdown\"]/div[1]/div[1]/div/div[2]/div[2]/div/a[2]")).click();
+        driver.findElement(By.xpath("//*[@class='hidden-xs'][contains(text(),'Путешествия')]")).click();
+
         driver.findElement(By.xpath("//*[contains(text(), 'Страхование выезжающих за')]")).click();
 
         WebElement element = driver.findElement(By.xpath("//a[contains(text(), 'Рассчитать')]"));
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView();",element);
-
         driver.findElement(By.xpath("//a[contains(text(), 'Рассчитать')]")).click();
 
         compareText(driver.findElement(By.xpath("//div/*[contains(text(), 'Страхование выезжающих')]")).getText(),"Страхование выезжающих за рубеж");
+//      здесь ломается
+        JavascriptExecutor js = (JavascriptExecutor)driver;
+        js.executeScript("scroll(0, 300);");
+        Wait <WebDriver> wait = new WebDriverWait(driver, 10, 1000);
+        wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.xpath("//button/*[contains(@class, 'content-title')]"))));
+        driver.findElement(By.xpath("//button/*[contains(@class, 'content-title')]")).click();
 
-        WebElement element1 = driver.findElement(By.xpath("//*[@id=\"calc-vzr-steps\"]/myrgs-steps-partner-auth/div[1]/div/div/div[1]/div[2]/div/div[1]/div/form/div[1]/btn-radio-group/div/button[2]"));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView();",element1);
-        driver.findElement(By.xpath("//*[@id=\"calc-vzr-steps\"]/myrgs-steps-partner-auth/div[1]/div/div/div[1]/div[2]/div/div[1]/div/form/div[1]/btn-radio-group/div/button[2]")).click();
 
-        fillForm(By.xpath("//*[@id=\"Countries\"]"),"Шенген");
+        fillForm(By.xpath("//*[@id='Countries']"),"Шенген");
+        driver.findElement(By.xpath("//input[@class='form-control-multiple-autocomplete-actual-input tt-input collapsed']")).click();
+        new Select(driver.findElement(By.name("ArrivalCountryList"))).selectByVisibleText("Испания");
+
+
 
         driver.close();
 
